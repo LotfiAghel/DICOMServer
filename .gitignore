@@ -52,7 +52,6 @@ app/
 AdminServer/Properties/
 AdminClient/app2/
 .env
-TestHelperAI/test runs
 .idea/
 WebApplication/Properties/
 /.aider.tags.cache.v3
@@ -62,3 +61,4 @@ WebApplication/Properties/
 /AdminClient/Properties
 /AdminClient/Properties
 WebApplication/wwwroot/lib/
+AdminServer/wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js
