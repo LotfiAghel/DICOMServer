@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="33.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Basics\Client\Client.csproj" />
+    <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\OpenAiWrapper\OpenAI_API\OpenAI_API.csproj" />
+    <ProjectReference Include="..\TestHelperAI\TestHelperAI.csproj" />
+    <ProjectReference Include="..\WebApiTests\WebApiTests.csproj" />
+  
+  </ItemGroup>
+
+  
+</Project>
