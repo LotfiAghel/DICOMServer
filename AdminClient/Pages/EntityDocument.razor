@@ -1,0 +1,84 @@
+@page "/classDocs/"
+
+
+
+@functions {
+
+    //<DataList TItem2=@Coach TItem=@Coach url="/old/" url2=@entityName >
+      RenderFragment CreateDynamicComponent2(Type typeClass) => builder =>
+   {
+       
+
+       var gt = typeof(AdminBaseComponenets.BaseComs.TypeShow<>).MakeGenericType(new Type[] {  typeClass });
+
+       builder.OpenComponent(0, gt);
+       Action<Type> onRedirect=(url)=>{
+            //Console.WriteLine("constructor is nullllllllllllllllllll " + tt);
+            Console.WriteLine("onRedirect "+url);
+            typeClass=url;
+            var typeName=url.GetName().Replace(".","__");
+            StateHasChanged();
+            //Click();
+            var link="/typeshow/"+typeName;
+            NavigationManager.NavigateTo(link, false);
+       };
+       var callback = EventCallback.Factory.Create<Type>(this, onRedirect);
+       builder.AddAttribute(1, "onRedirect", callback);
+
+       builder.CloseComponent();
+   };
+}
+
+
+
+
+
+
+    @foreach (var tclass in Program.docEntity){
+
+        <MatAccordion>
+                <MatExpansionPanel>
+                    <MatExpansionPanelSummary>
+                        <MatExpansionPanelHeader></MatExpansionPanelHeader>
+                        <MatExpansionPanelSubHeader>
+                            @tclass.GetName()   @tclass.GetPerisanName()
+                        </MatExpansionPanelSubHeader>
+                    </MatExpansionPanelSummary>
+                    <MatExpansionPanelDetails>
+                        <div>@CreateDynamicComponent2(tclass)</div>
+                    </MatExpansionPanelDetails>
+                </MatExpansionPanel>
+        </MatAccordion>
+    }
+
+
+
+
+@code {
+
+    
+    
+    
+    protected override async Task OnInitializedAsync()
+    {
+        
+
+        var valuesAndDescriptions = new Dictionary<int, string>();
+
+        
+    }
+
+    
+    
+    
+    
+    @inject NavigationManager NavigationManager;
+   
+
+
+
+
+
+
+
+}

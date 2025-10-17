@@ -1,0 +1,64 @@
+# Autosave files
+*~
+
+# build
+[Oo]bj/
+[Bb]in/
+packages/
+TestResults/
+test.sh
+
+# globs
+Makefile.in
+*.DS_Store
+*.sln.cache
+*.suo
+*.cache
+*.pidb
+*.userprefs
+*.usertasks
+config.log
+config.make
+config.status
+aclocal.m4
+install-sh
+autom4te.cache/
+*.user
+*.tar.gz
+tarballs/
+test-results/
+Thumbs.db
+.vs/
+
+# Mac bundle stuff
+*.dmg
+*.app
+
+# resharper
+*_Resharper.*
+*.Resharper
+#.dll
+
+# dotCover
+*.dotCover
+*.meta
+
+.git-0/
+CommonWithServer2/
+app/
+
+.fake
+.ionide
+AdminServer/Properties/
+AdminClient/app2/
+.env
+.idea/
+WebApplication/Properties/
+/.aider.tags.cache.v3
+/AdminClient/Properties
+.aider.chat.history.md
+.aider.input.history
+/AdminClient/Properties
+/AdminClient/Properties
+WebApplication/wwwroot/lib/
+AdminServer/wwwroot/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js

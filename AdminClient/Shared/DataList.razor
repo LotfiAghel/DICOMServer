@@ -1,0 +1,165 @@
+﻿@typeparam TItem 
+@typeparam TItem2
+
+@using Models
+@using Newtonsoft.Json.Linq;
+@* /@inherits ComponentBase *@
+
+<Button Outlined="true" Clicked="@Click">Text @ButtonState</Button>
+<th><a href="@($"{EntityName}/edit/new")"
+                class="btn btn-primary m-1">new</a></th>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ویرایش</th>
+            @{
+                foreach (var property in propertis)
+                {
+                    var x=property.GetCustomFirstAttributes<Models.PersianLabel>();
+                    
+                    if(x!=null){
+                        <th>@x.txt</th>
+                    }else{
+                        <th>@property.Name</th>
+                    }
+                }
+            }
+        </tr>
+    </thead>
+    @{
+        
+
+    
+        foreach (TItem item in Data ?? (new List<TItem>()))
+        {
+            string itemId="known";
+            {
+                var x=(item  as IdMapper<int>);
+                if(x!=null)    
+                    itemId=x.id.ToString();
+            }
+            {
+                var x=(item  as Models.Entity);
+                if(x!=null)    
+                    itemId=x.id.ToString();
+            }
+
+            
+            <tr>
+                <th><a href="@($"{EntityName}/edit/{itemId}")"
+                class="btn btn-primary m-1">Edit</a></th>
+                @{
+                    
+                    foreach (var property in propertis)
+                    {
+                        
+                            var attrs=property.GetCustomAttributes(typeof(object),false).ToList().ConvertAll<Attribute>(x=> x as Attribute);
+                            var value=property.GetValue(item);
+                            var w=Program0.createWidget(property.PropertyType,attrs);
+                            object str="";
+                            if(w!=null){
+                                <th>@Program0.CreateDynamicComponent2(this,w,value)</th>;
+                                continue;
+                            }
+                            str = value;
+                            if(property.PropertyType.IsClass && value!=null){
+                                str=JToken.FromObject(value).ToString();
+                                //<th>@{JToken.FromObject(value).ToString();}</th>
+                                //continue;
+                            }/**/
+                            
+                            
+
+                            var x=property.GetCustomFirstAttributes<Models.SmallPicShow>();
+                            
+                            
+                            
+                        
+                            if(x!=null){
+                            <th> <img src="@str" asp-append-version="true" height="100px"/></th>
+                            continue;
+                            }    
+
+                            
+                            if(property.PropertyType==typeof(DateTimeOffset?)){
+                                str="?";
+                                var v=(value as DateTimeOffset?);
+                                str=v.HasValue?v.Value.ToPersianDateString():"null";
+                            }
+
+                        if(property.PropertyType==typeof(DateTimeOffset)){
+                            str="?";
+                            var v=(value as DateTimeOffset?);
+                            str=v.HasValue?v.Value.ToPersianDateString():"null";
+                        }
+                        if(property.PropertyType==typeof(DateTime)){
+                            str="?";
+                            var v=(value as DateTime?);
+                            str=v.HasValue?v.Value.ToPersianDateString():"null";
+                        }
+                    
+                    <th>
+                    @str 
+                    </th>
+
+
+                }
+            }
+        </tr>
+    }
+    }
+
+</table>
+@code
+{
+    [Parameter]
+    public List<TItem> Data { get; set; }=new List<TItem>();
+
+
+    [Parameter]
+    public string url { get; set; }
+
+    [Parameter]
+    public string url2 { get; set; }
+
+    [Parameter]
+    public RenderFragment<TItem> ChildContent { get; set; }
+
+
+    string EntityName=typeof(TItem).Name;
+
+    public List<System.Reflection.PropertyInfo> propertis = typeof(TItem).GetProperties().ToList();
+
+    string ButtonState = "";
+    async Task Click()
+    {
+        ButtonState = "loading";
+        //Data = await Http.GetFromJsonAsync<List<TItem>>(Config.serverUrl+url+url2);
+        await load();
+
+    }
+    public async Task load()
+    {
+        var tmp = Program0.getEntityManager01<TItem>();
+        
+        
+
+        //var mi = tmp.GetType().GetMethod("getAll2");
+
+        //Task<List<object>> result = (Task<List<object>>)mi.Invoke(tmp, null);
+        Data = (await tmp.getAll()).ToList();
+
+        //StateHasChanged();
+
+        /*Data.Clear();
+        
+        foreach (var c in forecasts)
+        {
+            //var x= Convert.ChangeType(c, typeof(TItem));
+            //swich(TItem)    
+            Data.Add((TItem)c);
+        }/**/
+
+
+    }
+}

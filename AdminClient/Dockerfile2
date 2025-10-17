@@ -1,0 +1,64 @@
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+RUN apt-get update \
+    && apt-get install git cmake clang build-essential ca-certificates python -y --no-install-recommends
+RUN apt-get install emscripten   -y --no-install-recommends
+RUN  dotnet workload install  wasm-tools
+
+
+
+
+
+
+
+
+COPY /DICOMServer.sln ./
+
+COPY /Basics/ExtraBaseQueryTool/ExtraBaseQueryTool.csproj ./Basics/ExtraBaseQueryTool/
+COPY /Basics/BaseModels/BaseModels.csproj ./Basics/BaseModels/
+COPY /Basics/AdminClientViewModels/AdminClientViewModels.csproj ./Basics/AdminClientViewModels/
+COPY /Basics/AdminBaseComponenets/AdminBaseComponenets.csproj ./Basics/AdminBaseComponenets/
+COPY /Basics/BasicAttributes/BasicAttributes.csproj ./Basics/BasicAttributes/
+COPY /Basics/BaseDataAnottaions/BaseDataAnottaions.csproj ./Basics/BaseDataAnottaions/
+COPY /Basics/Client/Client.csproj ./Basics/Client/
+COPY /Models/Models.csproj ./Models/
+
+
+
+
+COPY /AdminClient/AdminClient.csproj ./AdminClient/
+
+RUN dotnet restore "/AdminClient/AdminClient.csproj"
+
+
+RUN echo "salam"
+
+
+
+RUN emcc --version
+RUN python --version
+
+
+COPY /Basics ./Basics
+
+COPY /Constants ./Constants
+COPY /Models ./Models
+COPY /AdminClient ./AdminClient
+
+
+
+
+COPY . /usr/share/nginx/html
+
+WORKDIR /AdminClient
+
+RUN echo `pwd`
+RUN dotnet build -c Release -o /app
+
+
+RUN dotnet publish -c Release -o /app
+
+FROM nginx as publish
+COPY --from=build /app/publish/wwwroot .
+#COPY nginx.conf /etc/nginx/nginx.conf
+

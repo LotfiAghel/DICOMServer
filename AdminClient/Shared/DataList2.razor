@@ -1,0 +1,101 @@
+﻿@typeparam TItem
+@typeparam TItem2
+@using AdminClient
+
+@using Models
+<Button Outlined="true" Clicked="@Click">Text @ButtonState</Button>
+<table class="table">
+    <thead>
+        <tr>
+            @{
+                foreach (var property in propertis)
+                {
+                    var x=property.GetCustomFirstAttributes<Models.PersianLabel>();
+                    if(x!=null){
+                        <th>@x.txt</th>
+                    }else{
+                        <th>@property.Name</th>
+                    }
+                }
+            }
+        </tr>
+    </thead>
+
+    @foreach (TItem item in Data ?? Array.Empty<TItem>())
+    {
+        <tr>
+            @{
+                foreach (var property in propertis)
+                {
+                    <th>@{
+                        var value=property.GetValue(item);
+                        object str = value;
+                        
+
+                        var x=property.GetCustomFirstAttributes<Models.SmallPicShow>();
+                        
+                        
+                       
+                        if(x!=null){
+                            <img src="@str" asp-append-version="true" height="100px"/>
+                        }    
+
+                        var y=property.GetCustomFirstAttributes<Models.StarRateShow>();
+                        if(y!=null){
+                            for(int i=0; i<3;++i){
+                                <img src="@value" asp-append-version="true" height="10px"/>
+                            }
+                        }    
+                        if(property.PropertyType==typeof(DateTimeOffset?)){
+                            str="?";
+                            var v=(value as DateTimeOffset?);
+                            str=v.HasValue?v.Value.ToPersianDateString():"null";
+                        }
+
+                        if(property.PropertyType==typeof(DateTimeOffset)){
+                            str="?";
+                            var v=(value as DateTimeOffset?);
+                            str=v.HasValue?v.Value.ToPersianDateString():"null";
+                        }
+                        if(property.PropertyType==typeof(DateTime)){
+                            str="?";
+                            var v=(value as DateTime?);
+                            str=v.HasValue?v.Value.ToPersianDateString():"null";
+                        }
+                    }
+
+                    @str 
+                    </th>
+
+
+                }
+            }
+        </tr>
+    }
+
+</table>
+@code
+{
+    [Parameter]
+    public IEnumerable<TItem> Data { get; set; }
+
+
+    [Parameter]
+    public string url { get; set; }
+
+    [Parameter]
+    public string url2 { get; set; }
+
+    [Parameter]
+    public RenderFragment<TItem> ChildContent { get; set; }
+
+    public List<System.Reflection.PropertyInfo> propertis = typeof(TItem).GetProperties().ToList();
+
+    string ButtonState = "";
+    async Task Click()
+    {
+        ButtonState = "loading";
+        //Data = await Http.GetFromJsonAsync<List<TItem>>("Config.serverUrl"+url+url2);
+
+    }
+}

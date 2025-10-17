@@ -1,0 +1,55 @@
+﻿@using AdminMsgs
+@using Models
+@inherits EditBase2<Models.User>
+
+
+<GenericForm TItem=@Models.User value=@value ReadOnly=ReadOnly/>
+
+
+<EditForm Model="@value">
+    @if (value != null)
+    {
+        
+
+        <Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged">
+            <Items>
+                <Tab Name="sessions">sessions</Tab>
+                <Tab Name="user">jwt removemgigrate Data</Tab>
+                <Tab Name="actionBar">actionBar</Tab>
+            </Items>
+            <Content>
+                <TabPanel Name="sessions">
+                    <CascadingValue Value="@value" Name="user">
+                        <ApiCall url=@($"AdminUser/getSessions/{value.id}") method=@HttpMethod.Get type=@typeof(FuncV<MVoid, GetSessionsResponse>) title="get redis sessions"/>
+                    </CascadingValue>
+                    <ApiCall url=@($"AdminUser/deleteAllSessions/{value.id}") method=@HttpMethod.Get type=@typeof(FuncV<MVoid, int>) title="delete all sessions"/>
+                </TabPanel >
+                <TabPanel Name="user">
+                    <div class="col-sm-10">
+                        <ApiCall url=@($"AdminUser/getJwt/{value.phoneNumber}") method=@HttpMethod.Get type=@typeof(FuncV<MVoid,GetJwtResponse>) title="get jwt" />
+                        <ApiCall url=@($"AdminUser/removeStatisticsData/{value.id}") method=@HttpMethod.Get type=@typeof(FuncV<MVoid,int>) title="remove statics data(progress)" />
+                        <ApiCall url=@($"AdminUser/removeUserMigrateDataLight/{value.id}") method=@HttpMethod.Get type=@typeof(FuncV<MVoid,int>) title="removeUserMigrateDataLight" />
+                    </div>
+                </TabPanel>
+                <TabPanel Name="actionBar">
+                    <div> @Program0.CreateDynamicComponentActionbar(typeof(User),actionValue,value,[typeof(User),typeof(Guid)])</div>
+                </TabPanel>
+            </Content>
+        </Tabs>
+       
+
+    }
+
+
+
+</EditForm>
+ @code{
+    string selectedTab = "value";
+    object actionValue = null;
+    private Task OnSelectedTabChanged(string name)
+    {
+        selectedTab = name;
+
+        return Task.CompletedTask;
+    }
+ }

@@ -1,0 +1,167 @@
+﻿
+@page "/page/{entityName}"
+
+@using Models
+@using AdminBaseComponenets
+@using System.ComponentModel;
+@using Tools;
+
+@code {
+    
+    
+    
+    
+    
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(entityName))
+        {
+            genericArgs = Program0.getValueKeyPair(entityName);
+            cccMetaClass = typeof(CCC<,>).MakeGenericType(genericArgs);
+            if (obj == null || obj.GetType() != cccMetaClass)
+                obj = (CCC0)cccMetaClass.GetConstructor(Type.EmptyTypes).Invoke(new object[] { });
+            label = genericArgs[0].GetPerisanName();
+            rnd = entityName;
+        }
+    }
+}
+
+
+@if (genericArgs != null && genericArgs[0] != null)
+{
+    <!-- Always show New and Reload buttons, and add search bar -->
+    <div class="d-flex align-items-center mb-2">
+        @if (Program0.checkPermission<Models.InsertAccess>(genericArgs[0]))
+        {
+            <a href="@($"{entityName}/edit/new")" class="btn btn-primary m-1">New</a>
+        }
+        <Button Outlined="true" Clicked=@(()=>Click(true)) class="m-1">Reload</Button>
+        <button class="btn btn-secondary m-1" @onclick="() => showSearchAccordion = !showSearchAccordion">
+            جستجو پیشرفته
+        </button>
+    </div>
+    <div class="accordion" style="margin-bottom:1rem;">
+        <div class="card">
+            <div class="card-header" @onclick="() => showSearchAccordion = !showSearchAccordion" style="cursor:pointer;">
+                <span>فرم جستجو</span>
+                <span style="float:right;">@(showSearchAccordion ? "▲" : "▼")</span>
+            </div>
+            <div class="collapse @(showSearchAccordion ? "show" : "")">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1 mx-2">
+                            @Program0.CreateDynamicComponent2(this, Program0.createForm3(typeof(Models.IQuery<>).MakeGenericType(genericArgs[0])), serachData, onChange)
+                        </div>
+                        <Button Outlined="true" Clicked=@OnSearch class="m-1">@searchButtonState</Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@functions {
+
+    // Search state
+    bool showSearchAccordion = false;
+    object serachData = null;
+    string searchButtonState = "Search";
+
+    void onChange(object x)
+    {
+        serachData = x;
+    }
+
+    async Task load()
+    {
+        searchButtonState = "Searching...";
+        try
+        {
+            // Use the entity manager to fetch filtered data using serachData (like SearchPage.razor)
+            var entityManagerType = typeof(NewEntityService<,>).MakeGenericType(genericArgs);
+            var entityManager = Program0.getEntityManager0(genericArgs[0]);
+            var getAll2Method = entityManagerType.GetMethod("getAll2");
+            var task = (Task)getAll2Method.Invoke(entityManager, new object[] { serachData });
+            await task.ConfigureAwait(false);
+            var resultProperty = task.GetType().GetProperty("Result");
+            var filteredData = resultProperty.GetValue(task);
+
+            // Set the filtered data in obj
+            var valueProp = obj.GetType().GetProperty("value");
+            valueProp.SetValue(obj, filteredData);
+
+            searchButtonState = "Search";
+            rnd = entityName + DateTime.Now.Ticks; // force UI update
+            StateHasChanged();
+        }
+        catch
+        {
+            searchButtonState = "Search failed";
+        }
+    }
+
+    async Task OnSearch()
+    {
+        await load();
+    }
+
+    RenderFragment CreateDynamicComponent2() => builder =>
+    {
+        Console.WriteLine("CreateDynamicComponent2 " + genericArgs[0]);
+        if(obj==null){
+            Console.WriteLine("obj is null");
+        }else
+            Console.WriteLine("obj not null");
+        var data2=obj.getData0();
+        if(data2!=null)
+            Console.WriteLine("CreateDynamicComponent2 "+data2.GetType());
+        else
+            Console.WriteLine("CreateDynamicComponent2 data is null");
+        
+        gridMetaClass = typeof(DataListBlazorise<,>).MakeGenericType(genericArgs);
+        
+        builder.OpenComponent(0, gridMetaClass);
+        builder.AddAttribute(1, "value", data2);
+        builder.CloseComponent();
+    };
+}
+@{
+
+
+    genericArgs =  Program0.getValueKeyPair(entityName);
+
+
+   
+    cccMetaClass = typeof(CCC<,>).MakeGenericType(genericArgs);
+    if (obj != null && obj.GetType() != cccMetaClass)
+        obj=null;
+
+    
+    
+    if(obj==null)
+        obj=cccMetaClass.GetConstructor(new Type[]{}).Invoke(new object[]{}) as CCC0;
+    
+    
+
+    
+    
+    
+        
+    label = genericArgs[0].GetPerisanName();
+
+
+    <h1>@label</h1>
+    if(obj!=null && obj.getData0()!=null){
+        <div @key=rnd>
+            @CreateDynamicComponent2();
+        </div>
+    }else{
+        Click(false);
+    }
+
+
+                    
+
+}
+

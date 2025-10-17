@@ -1,0 +1,21 @@
+@using Models
+
+
+
+@inherits DisplayInSelectBaseInt<User>
+@if (value == null)
+{
+    <div class="spinner"></div>
+}
+else
+{
+    <div class="empimg">
+        @{
+            string style = $"font-size:14px;color:black;";
+            <Tooltip Text=@value.id.ToString()>
+                <span class="font-weight-bold pl-1" style=@style>@value.phoneNumber</span>
+            </Tooltip>
+            
+        }
+    </div>
+}

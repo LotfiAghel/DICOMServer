@@ -1,0 +1,19 @@
+@page "/{entityName}/edit/{Id}"
+
+
+@using Models
+@using System.Reflection;
+@using AdminBaseComponenets;
+@using System.ComponentModel;
+@using Tools;
+@using AdminBaseComponenets.Pages;
+
+<FormContainer entityName=@entityName Id=@Id></FormContainer>
+@code{
+        [Parameter]
+        public string entityName { get; set; }
+
+        [Parameter]
+        public string Id { get; set; }
+
+}

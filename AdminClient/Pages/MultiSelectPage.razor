@@ -1,0 +1,23 @@
+﻿@page "/multi-select"
+
+@using AdminBaseComponenets.BaseComs
+
+<MultiSelect Items="@items"></MultiSelect>
+
+@code{
+    public class Item
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+    }
+    private List<Item> items = new List<Item>
+{
+        new Item { id = 1, name = "آیتم 1" },
+        new Item { id = 2, name = "آیتم 2" },
+        new Item { id = 3, name = "آیتم 3" },
+        new Item { id = 4, name = "آیتم 4" },
+        new Item { id = 5, name = "آیتم 5" },
+        new Item { id = 6, name = "آیتم 6" },
+        new Item { id = 7, name = "آیتم 7" },
+    };
+}

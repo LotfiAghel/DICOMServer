@@ -1,0 +1,18 @@
+[submodule "Basics"]
+	path = Basics
+	url = git@github.com:LotfiAghel/DotNetBasic.git
+[submodule "OpenAiWrapper"]
+	path = OpenAiWrapper
+	url = git@github.com:LotfiAghel/OpenAI-API-dotnet.git
+[submodule "google-api-dotnet-client"]
+	path = google-api-dotnet-client
+	url = git@github.com:LotfiAghel/google-api-dotnet-client.git
+[submodule "openai-dotnet"]
+	path = openai-dotnet
+	url = git@github.com:LotfiAghel/openai-dotnet.git
+[submodule "OpenAI-API-dotnet"]
+	path = OpenAI-API-dotnet
+	url = git@github.com:LotfiAghel/OpenAI-API-dotnet.git
+[submodule "DicomUtilsCS"]
+	path = DicomUtilsCS
+	url = git@github.com:LotfiAghel/DicomUtilsCS.git

@@ -1,0 +1,18 @@
+@page "/apiPage/{url}"
+
+
+@using Models
+@using AdminBaseComponenets
+@using System.ComponentModel;
+@using Tools;
+
+
+
+<!-- Program0.CreateDynamicComponent2(this,@Program0.createForm(Program.getFuncType(Program0.PConvertUrl(url)), new List<Attribute>() { }),Program0.PConvertUrl(url))-->
+<ApiCall url=@(Program0.PConvertUrl(url)) method=@HttpMethod.Post type=@(Program.getFuncType(Program0.PConvertUrl(url))) title="run" />
+
+
+@code{
+    [Parameter]
+    public string url{get;set;}
+}

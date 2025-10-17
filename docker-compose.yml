@@ -1,0 +1,189 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:16
+    command: >
+      postgres
+      -c 'max_connections=250'
+      -c 'archive_mode=on'
+      -c 'archive_command=gzip < %p > /var/lib/postgresql/data/wal_archive/%f.gz'
+      -c 'wal_level=replica'
+      -c 'max_wal_senders=3'
+      -c 'max_replication_slots=3'
+    container_name: local_pgdb
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: DICOMPASS
+    ports:
+      - "4064:5432"
+    volumes:
+      - /mnt/sdb/data/product-db/:/var/lib/postgresql/data
+      - /mnt/sdb/data/product-db-wal-archive/:/var/lib/postgresql/data/wal_archive/
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: adminuyhtnglirqt
+      MAX_LOGIN_ATTEMPTS: 100
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin2
+  cache:
+    image: redis
+    container_name : redis
+    hostname: redis
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning 
+    environment:
+      - ENABLE_OVERCOMMIT_MEMORY=true
+    volumes: 
+      - /mnt/sdb/data/redis/:/data
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: ghcr.io/joeferner/redis-commander:latest
+    build: .
+    restart: always
+    environment:
+      - REDIS_HOSTS=local:cache:6379
+    ports:
+      - "8081:8081"
+  dicom-admin-server:
+    container_name: dicom-admin-server
+    hostname: dicom-admin-server
+    image: ghcr.io/lotfiaghel/dicom-admin-server:latest
+    build:
+      context: ./
+      dockerfile: AdminServer/Dockerfile
+      args:
+        GIT_COMMIT: ${GIT_COMMIT}
+    mem_limit: 10g
+    oom_score_adj: 500
+    deploy:
+      resources:
+        limits:
+          memory: 10g
+    restart: always
+    environment:
+      - db_host=db
+      - db_port=5432
+      - db_user=user
+      - db_pass=DICOMPASS
+      - database=test_helper
+      - db_name=dicom_db
+      - ContentRootPath="/"
+      - CONTENT_ROOT_PATH=/Upload
+      - USER_UPLOAD_PATH=/userUpload
+      - ADMIN_USE_URLS=http://0.0.0.0:80
+      - REDIS_HOST=cache
+      - external_url="https://localhost:5000/"
+      - ADMIN_SERVER_HTTTPS_URL="https://91.107.172.96:3011/"
+      - GIT_COMMIT=${GIT_COMMIT}
+      - TZ=Asia/Tehran
+      - DEBIAN_FRONTEND=noninteractive
+    volumes:
+    - /mnt/sdb/data/StaticFiles/Upload:/Upload
+    - /mnt/sdb/data/StaticFiles/userUpload:/userUpload
+    ports:
+      - "3010:80"
+  dicom-web-server:
+    container_name: dicom-web-server
+    hostname: dicom-web-server
+    image: ghcr.io/lotfiaghel/dicom-web-server:latest
+    restart: always
+    mem_limit: 10g
+    oom_score_adj: 500
+    deploy:
+      resources:
+        limits:
+          memory: 10g
+    build:
+      context: ./
+      dockerfile: WebApplication/Dockerfile
+      args:
+        GIT_COMMIT: ${GIT_COMMIT}  
+    environment:
+      - db_host=db
+      - db_port=5432
+      - db_user=user
+      - db_pass=DICOMPASS
+      - database=test_helper
+      - db_name=dicom_db
+      - ContentRootPath="/"
+      - CONTENT_ROOT_PATH=/Upload
+      - USER_UPLOAD_PATH=/userUpload
+      - USE_URLS=http://0.0.0.0:80
+      - REDIS_HOST=cache
+      - external_url="https://localhost/"
+      - GIT_COMMIT=${GIT_COMMIT}
+      - TZ=Asia/Tehran
+      - DEBIAN_FRONTEND=noninteractive
+    volumes:
+    - /mnt/sdb/data/StaticFiles/Upload:/Upload
+    - /mnt/sdb/data/StaticFiles/userUpload:/userUpload
+    ports:
+      - "3031:443"
+      - "3030:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  dicom-web-server-beta:
+    image: ghcr.io/lotfiaghel/web-server:latest
+    #image: hub.yottab.io/testhelper/web-server:latest
+    container_name: web-server-beta
+    hostname: web-server-beta
+    restart: always
+    mem_limit: 10g
+    oom_score_adj: 500
+    deploy:
+      resources:
+        limits:
+          memory: 10g
+    build:
+      context: ./
+      dockerfile: WebApplication/Dockerfile
+      args:
+        GIT_COMMIT: ${GIT_COMMIT}  
+    environment:
+      - db_host=db
+      - db_port=5432
+      - db_user=user
+      - db_pass=DICOMPASS
+      - database=test_helper
+      - db_name=dicom_db
+      - ContentRootPath="/"
+      - CONTENT_ROOT_PATH=/Upload
+      - USER_UPLOAD_PATH=/userUpload
+      - USE_URLS=http://0.0.0.0:80
+      - REDIS_HOST=cache
+      - external_url="https://localhost/"
+      - GIT_COMMIT=${GIT_COMMIT}
+      - TZ=Asia/Tehran
+      - DEBIAN_FRONTEND=noninteractive
+    volumes:
+    - /mnt/sdb/data/StaticFiles/Upload:/Upload
+    - /mnt/sdb/data/StaticFiles/userUpload:/userUpload
+    ports:
+      - "6004:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  
+  dicom-admin-client:
+    container_name: admin-client
+    hostname: admin-client
+    image: ghcr.io/lotfiaghel/admin-client:latest
+    restart: always
+    build:
+      context: ./
+      dockerfile: AdminClient/Dockerfile
+    ports:
+      - "3020:80"
+ 
+volumes:
+  local_pgdata:
+  pgadmin-data:
+  cache:
+    driver: local

@@ -1,0 +1,122 @@
+﻿@page "/login"
+@using AdminBaseComponenets;
+@using Models
+@using AdminClient
+@using Microsoft.AspNetCore.Components.Rendering;
+
+
+
+
+@using System.Collections.Generic
+@inject IJSRuntime JsRuntime;
+@*// TODO issue_7*@
+
+<div>
+    @ClTool2.WebClient.webClient.baseUrl
+    <Select TValue="int" SelectedValue=@value
+                    SelectedValueChanged=@Click2
+                   >
+        @for (int i = 0; i < servers.Count; ++i)
+        {
+            var localVariable = i;
+            <SelectItem TValue="int" value=@localVariable>@servers[localVariable]</SelectItem>
+        }
+
+    </Select>
+    
+    <Row>
+        <Column ColumnSize=ColumnSize.Is4>
+            <label for="user">نام کاربری</label>
+        </Column>
+        <Column ColumnSize=ColumnSize.Is4>
+            <TextEdit  id="user"  @bind-Text=@user />
+        </Column>
+    </Row>
+    <Row>
+         <Column ColumnSize=ColumnSize.Is4>
+            <label for="pass">رمز عبور</label>
+        </Column>
+         <Column ColumnSize=ColumnSize.Is4>
+            <TextEdit type="password" id="pass"  @bind-Text=@pass />
+        </Column>
+    </Row>
+    
+</div>
+<Button Outlined="true" Clicked=@Click>ورود</Button>
+@if (res != null && !res.done)
+{
+    <div>
+    @res.text
+</div>
+}
+
+
+
+@code {
+    public List<string> servers = Consts.servers;
+    public string pass;
+    public string user;
+    public int _value;
+    public int value { get{
+            _value=0;
+            for(int i=0; i<servers.Count; ++i)
+                if(servers[i]+"/"==ClTool2.WebClient.webClient.baseUrl)
+                    _value=i;
+            return _value;
+        }
+        set{
+            this._value=value;
+        } }
+    AdminMsg.LoginRequest req=new AdminMsg.LoginRequest();
+
+
+    AdminMsg.LoginResponse<AdminUser> res = null;
+    private void IncrementCount()
+    {
+        
+    }
+    @inject NavigationManager NavigationManager;
+    string ButtonState = "";
+    async Task Click2(int i)
+    {
+        ClTool2.WebClient.webClient.baseUrl = servers[i]+"/";
+
+
+    }
+    async Task Click()
+    {
+        ButtonState = "Clicked";
+
+
+        req.userName = user;
+        req.pass = pass;
+
+        res = await ClTool2.WebClient.webClient.fetch<AdminMsg.LoginRequest, AdminMsg.LoginResponse<AdminUser>>("adminUser/login",
+        HttpMethod.Post, req);
+        if (res != null && res.done)
+        {
+            await JsRuntime.InvokeAsync<string>("blazorExtensions.SetCookie", new[] { "isAuthenticated", "true" });
+            await JsRuntime.InvokeAsync<string>("blazorExtensions.SetCookie", new[] { "url", ClTool2.WebClient.webClient.baseUrl });                    
+
+            NavigationManager.NavigateTo("/cpage/users", false);
+
+            Console.WriteLine("logined");
+            Program.ChangeMenu(res.user);
+            Console.WriteLine("logined<>");
+            ClTool2.WebClient.webClient.SaveCookie();
+            //TODO redirect to another page
+        }
+        // TODO issue_7
+        Console.WriteLine(res);
+        //oldBase.fetch2
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        
+    }
+
+
+
+
+
+}

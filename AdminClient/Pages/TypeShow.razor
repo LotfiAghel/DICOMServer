@@ -1,0 +1,124 @@
+@page "/typeshow/{typeName}"
+@using System.Linq
+@using MyRefelctionMirror;
+
+@functions {
+
+    //<DataList TItem2=@Coach TItem=@Coach url="/old/" url2=@entityName >
+      RenderFragment CreateDynamicComponent2(Type typeClass) => builder =>
+   {
+       
+
+       var gt = typeof(AdminBaseComponenets.BaseComs.TypeShow<>).MakeGenericType(new Type[] {  typeClass });
+
+       builder.OpenComponent(0, gt);
+       Action<Type> onRedirect=(url)=>{
+            //Console.WriteLine("constructor is nullllllllllllllllllll " + tt);
+            Console.WriteLine("onRedirect "+url);
+            typeClass=url;
+            typeName=url.GetName().Replace(".","__");
+            StateHasChanged();
+            //Click();
+            var link="/typeshow/"+typeName;
+            NavigationManager.NavigateTo(link, false);
+       };
+       var callback = EventCallback.Factory.Create<Type>(this, onRedirect);
+       builder.AddAttribute(1, "onRedirect", callback);
+
+       builder.CloseComponent();
+   };
+}
+
+
+
+
+
+@if(typeClass!=null){
+    OnInitializedAsync0();
+
+    <div>@CreateDynamicComponent2(typeClass)</div>
+    
+    @foreach (var tclass in classess)if(tclass!=typeClass){
+        var title=$"{tclass.GetName()}   {tclass.GetPerisanName()}";
+        <Accordion title=@title>
+                
+                        <div>@CreateDynamicComponent2(tclass)</div>
+                
+        </Accordion>
+    }
+}
+
+
+
+@code {
+
+    public List<Type>  classess;
+    public List<int> optionsV = new List<int>();
+    public List<string> optionsL = new List<string>();
+
+    private bool shouldRender = true;
+
+    protected override bool ShouldRender()
+    {
+        return shouldRender;
+    }
+    protected override async Task OnInitializedAsync(){
+        OnInitializedAsync0();
+    }
+    protected void OnInitializedAsync0()
+    {
+        typeName=typeName.Replace("__",".");
+        typeClass= TypeNameSerializationBinder2.global.BindToType(null, typeName);
+
+        var valuesAndDescriptions = new Dictionary<int, string>();
+
+        // gets the Type that contains all the info required
+        // to manipulate this type
+        classess=typeClass.GetSubClasses();
+
+        // I will get0s all values and iterate through them
+        if(typeClass.IsEnum){
+            var enumValues = typeClass.GetEnumValues();
+
+            foreach (object value in enumValues)
+            {
+                // with our Type object we can get0s the information about
+                // the members of it
+                var memberInfo =
+                    typeClass.GetMember(value.ToString()).First();
+
+
+                optionsV.Add((int)Convert.ChangeType(value, typeof(int)));
+                optionsL.Add(value.ToString());
+
+
+
+
+            }
+        }
+    }
+
+    [Parameter]
+    public string typeName{get;set;}
+    public Type typeClass;
+    List<ControllerInfo> values = new List<ControllerInfo>();
+    ClTool.WebClient oldBase;
+    object result=null;
+    
+    
+    @inject NavigationManager NavigationManager;
+    async Task Click()
+    {
+        await Task.Delay(50);
+        StateHasChanged();
+        
+         //NavigationManager.NavigateTo("editemployee", false);
+    }
+
+
+
+
+
+
+
+}
